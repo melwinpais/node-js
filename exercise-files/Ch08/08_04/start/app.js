@@ -1,5 +1,7 @@
 var express = require("express");
 var cors = require("cors");
+const bodyParser = require('body-parser');
+
 var app = express();
 
 var skierTerms = [
@@ -17,9 +19,12 @@ var skierTerms = [
     }
 ];
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+
 
 app.use(function(req, res, next) {
-	console.log(`${req.method} request for '${req.url}'`);
+	console.log(`${req.method} request for '${req.url}' - ${JSON.stringify(req.body)}`);
 	next();
 });
 
@@ -30,6 +35,19 @@ app.use(cors());
 app.get("/dictionary-api", function(req, res) {
 	res.json(skierTerms);
 });
+
+app.post('/dictionary-api', (req, res) => {
+  skierTerms.push(req.body);
+  res.json(skierTerms);
+});
+
+app.delete("/dictionary-api/:term", (req, res) => {
+  skierTerms = skierTerms.filter((definition) => {
+    return definition.term.toLowerCase() !== req.params.term.toLowerCase();
+  });
+  res.json(skierTerms);
+});
+
 
 app.listen(3000);
 
